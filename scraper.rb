@@ -8,23 +8,33 @@ date = Date.today
 url_addition = "#{date.year}-#{date.month}-#{date.day}"
 
 ## grab all broad links to popular destinations
-output = File::open("DD_data.txt", "w")
-output << '['
+output_text = File::open("DD_data.txt", "w")
+output_csv = File.open("DD_data.csv", "w")
+output_text << '['
+output_csv << 'date, category, link'
 
-(1..365).each do |pg|
+(1..(365 * 2)).each do |pg|
     url = base_url + url_addition
     Nokogiri::HTML(open(url)).css("a.thumb").each do |box|
         link = box["href"]
         category = box["title"]
-        output << "{\"catagory\"   : \"#{category}\",
+        if category.is_a? String
+            category = box["title"].sub(/^(.*?)\ in /, '')
+        end
+        output_csv << "#{date}, #{category}, #{link}"
+        output_text << "{\"date\" : \"#{date}\",
+                \"catagory\"   : \"#{category}\",
                 \"link\"   : \"#{link}\"
                 },"
     end
     puts "I just scraped Daily Deviations from #{date}!"
     sleep 1.0 + rand # sleep to avoid hitting the server too frequently
+    if rand > 0.99
+        sleep 5.0
+    end
     date -= 1 # move down one day
 end
 
-output << "]"
-output.close
+output_text << "]"
+output_text.close
 puts "Done! ^_^"
