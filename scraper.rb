@@ -11,7 +11,7 @@ url_addition = "#{date.year}-#{date.month}-#{date.day}"
 output_text = File::open("DD_data.txt", "w")
 output_csv = File.open("DD_data.csv", "w")
 output_text << '['
-output_csv << 'date, category, link'
+output_csv << "date,link,top_level,category\n"
 
 (1..(365 * 2)).each do |pg|
     url = base_url + url_addition
@@ -19,9 +19,10 @@ output_csv << 'date, category, link'
         link = box["href"]
         category = box["title"]
         if category.is_a? String
-            category = box["title"].sub(/^(.*?)\ in /, '')
+            category = box["title"].sub(/^(.*?)\ in /, '').gsub(/,/, '')
+            top_level = category.sub(/ >.*/, '')
         end
-        output_csv << "#{date}, #{category}, #{link}"
+        output_csv << "#{date},\"#{link}\",\"#{top_level}\",\"#{category}\"\n"
         output_text << "{\"date\" : \"#{date}\",
                 \"catagory\"   : \"#{category}\",
                 \"link\"   : \"#{link}\"
